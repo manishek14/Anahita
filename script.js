@@ -249,6 +249,25 @@
 
         let soundEnabled = false;
 
+        function enableMediaFallback(media, attribute = "src") {
+          if (!media || media.dataset.fallbackReady === "true") return;
+          const fallback = media.dataset.fallbackSrc;
+          if (!fallback) return;
+          media.dataset.fallbackReady = "true";
+          media.addEventListener("error", () => {
+            if (media.dataset.fallbackUsed === "true") return;
+            media.dataset.fallbackUsed = "true";
+            media[attribute] = fallback;
+            if (media.tagName === "SOURCE") media.parentElement.load();
+          }, { once: true });
+        }
+
+        document.querySelectorAll("img[data-fallback-src]").forEach((image) => {
+          enableMediaFallback(image);
+        });
+        const audioSource = songAudio?.querySelector("source[data-fallback-src]");
+        enableMediaFallback(audioSource);
+
         function currentLang() {
           return html.getAttribute("lang") || "fa";
         }
